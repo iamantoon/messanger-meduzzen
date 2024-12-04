@@ -1,0 +1,88 @@
+@if (message) {
+  <section 
+    class="flex flex-col justify-between gap-2 w-full p-4 rounded-lg"
+    [ngClass]="{
+      'bg-blue-50 text-left': senderLabel === 'You',
+      'bg-gray-100 text-left': !(senderLabel === 'You')
+    }"
+  >
+    <div class="w-full flex justify-between items-center">
+      <h6 class="font-bold">{{senderLabel}}</h6>
+      <button 
+        mat-icon-button 
+        [matMenuTriggerFor]="menu" 
+      >
+        <mat-icon class="mb-1">more_vert</mat-icon>
+      </button>
+    </div>
+    @if (isEditing) {
+      <div>
+        <textarea [(ngModel)]="editedContent" class="w-full p-2 border rounded-lg resize-none outline-none min-h-14">
+        </textarea>
+        <div class="flex justify-end gap-2 mt-2">
+          <button mat-flat-button (click)="saveEdit()">Save</button>
+          <button mat-stroked-button (click)="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+    } @else {
+      <p>{{message.content}}</p>
+        @if (message.fileUrls.length > 0) {
+          <div class="flex flex-wrap gap-4">
+            @for (url of message.fileUrls; track url) {
+              <div class="flex flex-col items-center file-item max-w-32">
+                @if (isImage(url)) {
+                  <a
+                    [href]="url"
+                    target="_blank"
+                    class="block w-32 h-28"
+                    matTooltip="{{extractFileExtension(url)}}"
+                  >
+                    <img
+                      [src]="url"
+                      alt="Attached image"
+                      class="w-full h-full object-cover cursor-pointer rounded"
+                    />
+                  </a>
+                } @else {
+                  <a
+                    [href]="url"
+                    target="_blank"
+                    class="w-32 h-24 flex justify-center items-center rounded bg-slate-50 cursor-pointer"
+                    matTooltip="{{extractFileExtension(url)}}"
+                  >
+                    <div class="flex items-center justify-center">
+                      <mat-icon class="text-5xl text-gray-500">{{getFileIcon(url)}}</mat-icon>
+                    </div>
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <p class="font-thin text-sm flex justify-end">
+        <i class="mr-1">{{message.edited ? 'Edited' : ''}}</i> 
+        {{message.messageSent | date: 'MMM d, y, HH:mm'}}
+      </p>
+
+      <mat-menu #menu="matMenu" [overlapTrigger]="false">
+        <button mat-menu-item (click)="copyContent(message.content)">
+          <mat-icon>content_copy</mat-icon>
+          <span>Copy</span>
+        </button>
+        @if (isAllowedToEditOrDelete) {
+          <button mat-menu-item (click)="startEdit()">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+          <button mat-menu-item (click)="deleteMessage()">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        }
+      </mat-menu>
+      
+      <div #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="menu"></div>
+  </section>
+}

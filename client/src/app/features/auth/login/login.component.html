@@ -1,0 +1,24 @@
+<form
+  [formGroup]="loginForm"
+  (ngSubmit)="login()"
+  class="container mt-5 mx-auto max-w-lg p-4 shadow-lg rounded-lg"
+>
+  <h2 class="text-center text-primary mb-6 text-2xl font-semibold">Login</h2>
+
+  <app-text-input [formControl]="$any(loginForm.controls['username'])" label="Username"></app-text-input>
+  <app-text-input [formControl]="$any(loginForm.controls['password'])" label="Password" type="password"></app-text-input>
+
+  <button
+    mat-raised-button
+    color="primary"
+    type="submit"
+    [disabled]="!loginForm.valid"
+    class="w-full"
+  >
+    Login
+  </button>
+  <p class="text-center mt-4">
+    Don't have an account?
+    <a routerLink="/register" class="text-blue-600 underline">Register</a>
+  </p>
+</form>
