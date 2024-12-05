@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY ./client/package*.json ./
 
-RUN npm install
+RUN npm install --omit=dev=false
+RUN npm i -g @angular/cli
 
 COPY ./client/ .
 
