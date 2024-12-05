@@ -18,35 +18,18 @@
     </div>    
     <div class="overflow-y-auto">
       @if (chatService.chats().length > 0) {
-        <div
-          *ngFor="let chat of chatService.chats()"
-          (click)="selectChat(chat)"
-          class="flex items-center gap-4 p-4 cursor-pointer hover:bg-blue-50 transition"
-          [class.bg-blue-100]="chat.id === activeChat?.id"
-        >
-          <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-white">
-            <mat-icon>person</mat-icon>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-gray-800 truncate">{{getCompanionFullname(chat)}}</p>
-            @if (chat.messages.length > 0) {
-              <p class="text-sm text-gray-600 truncate">{{getLastMessage(chat)}}</p>
-            }
-          </div>
-        </div>
+        @for (chat of chatService.chats(); track chat.id) {
+          <app-chat-item [chat]="chat" />
+        }
       } @else {
         <p class="text-center text-gray-500 mt-4">No chats</p>
       }
     </div>
   </div>
 
-  @if (activeChat) {
+  @if (chatService.activeChat()) {
     <div class="col-span-7 lg:col-span-8 bg-white flex flex-col">
-      <app-chat 
-        [username]="activeChat.participants[0].username" 
-        [chatId]="activeChat.id"
-        (setActiveChat)="setActualActiveChat($event)"
-      ></app-chat>
+      <app-chat [activeChat]="chatService.activeChat()" />
     </div>
   } @else {
     <div class="col-span-7 lg:col-span-8 w-full flex items-center justify-center text-gray-500">

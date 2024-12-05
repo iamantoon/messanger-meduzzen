@@ -9,6 +9,7 @@ import { ChatModule } from './chat/chat.module';
 import { FileModule } from './file/file.module';
 import { CloudinaryService } from './cloudinary/cloudinary.service';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { WebsocketsModule } from './websockets/websockets.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     PrismaModule, 
     ChatModule, 
     FileModule, 
-    CloudinaryModule
+    CloudinaryModule, 
+    WebsocketsModule
   ],
   controllers: [AppController],
   providers: [AppService, CloudinaryService],

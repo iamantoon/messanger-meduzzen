@@ -6,11 +6,19 @@ export interface Message {
   messageSent: string;
   edited: boolean;
   fileUrls: string[];
-  senderDeleted: boolean;
-  recipientDeleted: boolean;
   chatId: string;
   sender: Sender;
 }
+
+// id: "cm4adzpj3000euhiww4ar9ttk"
+// senderId: "cm49r03p3000b"
+// recipientId: "cm49qqdja0001uhu0zf5kmo6w"
+// content: "Ohhh bro are you here?"
+// messageSent: "2024-12-04T21:15:02.271Z"
+// edited: false
+// fileUrls: []
+// chatId: "cm4adzpim000cuhiw0ow9ln8m" 
+// sender: 
 
 export interface Sender {
   id: string

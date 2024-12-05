@@ -1,10 +1,11 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMessageDto } from './dtos/create-message.dto';
+import { MessagesGateway } from 'src/websockets/hubs/messages/messages.gateway';
 
 @Injectable()
 export class MessageService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly messagesGateway: MessagesGateway) {}
 
   public async addMessage(dto: CreateMessageDto, senderId: string) {
     const { recipientUsername, content, fileUrls } = dto;
@@ -49,15 +50,32 @@ export class MessageService {
       where: { id: chat.id },
       data: { updatedAt: new Date() },
     });
+
+    const sender = await this.prisma.user.findUnique({
+      where: { id: message.senderId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        username: true
+      },
+    });
+  
+    const messageWithSender = {
+      ...message,
+      sender
+    };
+
+    this.messagesGateway.sendMessage(messageWithSender);
   
     return message;
   }
 
-  async editMessage(messageId: string, content: string, userId: string) {
+  public async editMessage(messageId: string, content: string, userId: string) {
     const message = await this.prisma.message.findUnique({
       where: { id: messageId },
     });
-  
+
     if (!message) {
       throw new NotFoundException('Message not found');
     }
@@ -66,13 +84,17 @@ export class MessageService {
       throw new ForbiddenException('You can only edit your own messages');
     }
   
-    return this.prisma.message.update({
+    const updatedMessage = await this.prisma.message.update({
       where: { id: messageId },
       data: {
         content,
         edited: true,
       },
     });
+  
+    this.messagesGateway.updateMessage(updatedMessage);
+  
+    return updatedMessage;
   }
 
   public async deleteMessage(messageId: string, userId: string) {
@@ -101,6 +123,8 @@ export class MessageService {
         where: { id: message.chatId },
       });
     }
+
+    this.messagesGateway.deleteMessage(message);
   
     return true;
   }

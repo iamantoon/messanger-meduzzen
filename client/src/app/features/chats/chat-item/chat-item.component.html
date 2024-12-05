@@ -1,0 +1,26 @@
+@if (chat) {
+  <div
+    (click)="selectChat()"
+    class="flex items-center gap-4 p-4 cursor-pointer hover:bg-blue-50 transition"
+    [class.bg-blue-100]="chat.id === chatService.activeChat()?.id"
+  >
+    <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-white">
+      <mat-icon>person</mat-icon>
+    </div>
+    
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-1">
+        <p class="font-semibold text-gray-800 truncate">{{fullname}}</p>
+        @if (isOnline) {
+          <div class="w-3 h-3 bg-green-500 rounded-full border-2 mt-1" 
+            matTooltip="{{fullname!.split(' ')[0]}} is online"
+          >
+          </div>
+        }
+      </div>
+      @if (chat.messages.length > 0) {
+        <p class="text-sm text-gray-600 truncate">{{lastMessage}}</p>
+      }
+    </div>
+</div>
+}

@@ -15,7 +15,7 @@ export class AuthService {
   private chatService = inject(ChatService);
   private baseUrl = 'http://localhost:3000/api/auth/';
   public currentUser = signal<User | null>(null);
-  
+
   public login(model: Login) {
     return this.http.post<User>(this.baseUrl + 'login', model).pipe(
       map(user => {
@@ -38,6 +38,7 @@ export class AuthService {
     this.currentUser.set(null);
     this.router.navigateByUrl('/login');
     this.chatService.chats.set([]);
+    this.chatService.activeChat.set(null);
     localStorage.removeItem('user');
   }
 }

@@ -11,6 +11,7 @@ export class ChatService {
   private http = inject(HttpClient);
   private baseUrl = 'http://localhost:3000/api/chats';
   public chats = signal<Chat[]>([]);
+  public activeChat = signal<Chat | null>(null);
 
   public getChats(search: string) {
     let params = new HttpParams();
