@@ -33,3 +33,7 @@ This application operates similarly to Telegram, allowing users to register, sea
 
 * Use the Attach Files button to upload up to 5 files (e.g., images, videos, audio, or documents).
 * Supported formats include jpeg, png, gif, mp4, mp3, pdf, etc.
+
+**Important notes**
+
+Before running the application, you may need to manually remove the `user` field from your browser's `localStorage` to prevent any conflicts with existing user data.
