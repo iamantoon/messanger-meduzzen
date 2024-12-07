@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMessageDto } from './dtos/create-message.dto';
 import { MessagesGateway } from 'src/websockets/hubs/messages/messages.gateway';
+import { Message } from '@prisma/client';
 
 @Injectable()
 export class MessageService {
@@ -9,32 +10,9 @@ export class MessageService {
 
   public async addMessage(dto: CreateMessageDto, senderId: string) {
     const { recipientUsername, content, fileUrls } = dto;
-  
-    const recipient = await this.prisma.user.findUnique({
-      where: { username: recipientUsername },
-    });
-  
-    if (!recipient) {
-      throw new NotFoundException('Recipient not found');
-    }
-  
-    let chat = await this.prisma.chat.findFirst({
-      where: {
-        participants: {
-          every: { id: { in: [senderId, recipient.id] } },
-        },
-      },
-    });
-  
-    if (!chat) {
-      chat = await this.prisma.chat.create({
-        data: {
-          participants: {
-            connect: [{ id: senderId }, { id: recipient.id }],
-          },
-        },
-      });
-    }
+
+    const recipient = await this.findUserByUsername(recipientUsername);
+    const chat = await this.findOrCreateChat(senderId, recipient.id);
 
     const message = await this.prisma.message.create({
       data: {
@@ -46,28 +24,11 @@ export class MessageService {
       },
     });
 
-    await this.prisma.chat.update({
-      where: { id: chat.id },
-      data: { updatedAt: new Date() },
-    });
+    await this.updateChatTimestamp(chat.id);
 
-    const sender = await this.prisma.user.findUnique({
-      where: { id: message.senderId },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        username: true
-      },
-    });
-  
-    const messageWithSender = {
-      ...message,
-      sender
-    };
-
+    const messageWithSender = await this.prepareMessageWithSender(message);
     this.messagesGateway.sendMessage(messageWithSender);
-  
+
     return message;
   }
 
@@ -106,7 +67,7 @@ export class MessageService {
       throw new NotFoundException('Message not found');
     }
   
-    if (message.senderId !== userId && message.recipientId !== userId) {
+    if (message.senderId !== userId) {
       throw new ForbiddenException('You do not have permission to delete this message');
     }
   
@@ -127,5 +88,56 @@ export class MessageService {
     this.messagesGateway.deleteMessage(message);
   
     return true;
+  }
+
+  private async findUserByUsername(username: string) {
+    const user = await this.prisma.user.findUnique({ where: { username } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  private async findOrCreateChat(senderId: string, recipientId: string) {
+    let chat = await this.prisma.chat.findFirst({
+      where: {
+        participants: {
+          every: { id: { in: [senderId, recipientId] } },
+        },
+      },
+    });
+
+    if (!chat) {
+      chat = await this.prisma.chat.create({
+        data: {
+          participants: {
+            connect: [{ id: senderId }, { id: recipientId }],
+          },
+        },
+      });
+    }
+
+    return chat;
+  }
+
+  private async updateChatTimestamp(chatId: string) {
+    await this.prisma.chat.update({
+      where: { id: chatId },
+      data: { updatedAt: new Date() },
+    });
+  }
+
+  private async prepareMessageWithSender(message: Message) {
+    const sender = await this.prisma.user.findUnique({
+      where: { id: message.senderId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+      },
+    });
+
+    return { ...message, sender };
   }
 }

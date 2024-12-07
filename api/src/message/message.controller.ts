@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Param, Post, Put, Req, UseGuards } from '@nes
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dtos/create-message.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RequestWithUserPayload } from 'src/user/user.interface';
 
 @Controller('messages')
 export class MessageController {
@@ -9,7 +10,7 @@ export class MessageController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  public async sendMessage(@Body() dto: CreateMessageDto, @Req() req: any) {
+  public async sendMessage(@Body() dto: CreateMessageDto, @Req() req: RequestWithUserPayload) {
     const userId = req.user.id;
     return this.messageService.addMessage(dto, userId);
   }
@@ -19,7 +20,7 @@ export class MessageController {
   public async editMessage(
     @Param('id') messageId: string,
     @Body('content') content: string,
-    @Req() req: any,
+    @Req() req: RequestWithUserPayload,
   ) {
     const userId = req.user.id;
     return this.messageService.editMessage(messageId, content, userId);
@@ -27,7 +28,7 @@ export class MessageController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  public async deleteMessage(@Param('id') id: string, @Req() req: any) {
+  public async deleteMessage(@Param('id') id: string, @Req() req: RequestWithUserPayload) {
     const userId = req.user.id;
     return this.messageService.deleteMessage(id, userId);
   }

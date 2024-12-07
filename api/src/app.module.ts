@@ -7,7 +7,6 @@ import { MessageModule } from './message/message.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './chat/chat.module';
 import { FileModule } from './file/file.module';
-import { CloudinaryService } from './cloudinary/cloudinary.service';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { WebsocketsModule } from './websockets/websockets.module';
 
@@ -23,6 +22,6 @@ import { WebsocketsModule } from './websockets/websockets.module';
     WebsocketsModule
   ],
   controllers: [AppController],
-  providers: [AppService, CloudinaryService],
+  providers: [AppService],
 })
 export class AppModule {}
